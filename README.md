@@ -22,7 +22,7 @@ Upstream: https://github.com/vercel-labs/agent-browser
   （[release.yml#L346](https://github.com/vercel-labs/agent-browser/blob/f88c40b7ed7c2344af54b804b440b11169f98906/.github/workflows/release.yml#L346)）。
 
 这些 job id、output 名、result 判断全靠手写字符串对齐，而仓库里**没有任何 workflow 语义检查**：
-`git ls-tree` 只列出两个 workflow 文件，没有 actionlint 配置、没有 reachability 测试
+仓库树里只列出两个 workflow 文件，没有 actionlint 配置、没有 reachability 测试
 （[workflows 目录](https://github.com/vercel-labs/agent-browser/tree/f88c40b7ed7c2344af54b804b440b11169f98906/.github/workflows)）。
 换句话说：它有一张 15 个节点的启动依赖图，但没有任何办法在推之前证明"这次真的会发"。
 `needs.check-release.outputs.<拼错的名字>` 会安静地得到空串，比较永远是 false，job 直接不启动，日志里也没有
@@ -42,7 +42,7 @@ Upstream: https://github.com/vercel-labs/agent-browser
 零第三方依赖，只需要 Python 3.8+：
 
 ```bash
-git clone git@github-linmoxi33:linmoxi33/actions-reach.git && cd actions-reach
+git clone https://github.com/linmoxi33/actions-reach.git && cd actions-reach
 python3 -m unittest discover -s tests          # 15 个用例
 python3 bin/actions-reach examples/in/pipeline.yml
 ```

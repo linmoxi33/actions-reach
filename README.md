@@ -89,6 +89,10 @@ publish  runs     witness 2/5  result:build=success, trigger=push
 上游确实需要这个语义（发布失败后补 GitHub Release），所以工具只报 warning 不报 error——**没有把"设计如此"报成 bug**。
 4 个 job 的启动与否由 `needs.check-release.outputs.*` 决定，而这 4 个 job 在工具的 DAG 里都有确定的启动路径。
 
+另在 27 个真实 workflow（`openai/codex-security` 的 26 个 + `addyosmani/agent-skills` 的 1 个，共 44 个 job）上跑通，
+无崩溃；其中 8 个文件用了 YAML 锚点，工具会报 `AR016` 警告并声明结果可能不完整（而不是静默给出"没有 job"）。
+这 27 个文件上剩下的 3 条 error 级发现我**没有**逐条回上游核实，所以不在这里当成上游 bug 宣称。
+
 ## 局限
 
 - YAML 只覆盖 workflow 常见子集：多行块标量里的**空行会被折叠**；锚点 / 别名（`&a` / `*a`）不支持，遇到会解析成普通标量。
@@ -96,6 +100,8 @@ publish  runs     witness 2/5  result:build=success, trigger=push
   GitHub 的真实强转规则更细。
 - 不是模拟器：不执行 step、不建模 `concurrency`、`environment` 审批、`continue-on-error` 对 result 的影响。
 - 场景结论依赖你给的观测（`--assume` / `--output`）；不给就是不猜，报 `unknown`。
+- `github.ref` 与 `github.repository` 默认是 unknown（离线不知道你在哪个仓库/哪个 ref 上跑），
+  因此 `if: github.repository == '...'` 这类门槛不会被判成死代码——宁可 unknown，也不猜。
 
 ## 与同类项目的差异
 

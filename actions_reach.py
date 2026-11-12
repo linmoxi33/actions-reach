@@ -479,9 +479,10 @@ class Job:
 
 
 class Model:
-    def __init__(self, doc, path="<memory>"):
+    def __init__(self, doc, path="<memory>", raw=""):
         self.doc = doc
         self.path = path
+        self.unsupported_yaml = bool(re.search(r":\s*[&*][A-Za-z0-9_-]+|<<:\s*\*", raw or ""))
         self.triggers = self._triggers(doc.get("on"))
         self.jobs = {}
         for jid, spec in (doc.get("jobs") or {}).items():
@@ -560,9 +561,13 @@ class Model:
             else:
                 res, outs = state
                 needs[jid] = {"result": res, "outputs": dict(outs) if outs is not None else _UnknownDict()}
+        github = _UnknownDict()
+        github.update({"event_name": trigger,
+                       "ref": UNKNOWN,          # unknown unless the caller says otherwise
+                       "event": _UnknownDict(),
+                       "repository": UNKNOWN})
         return {
-            "github": {"event_name": trigger, "ref": "refs/heads/main",
-                       "event": _UnknownDict(), "repository": "owner/repo"},
+            "github": github,
             "needs": needs,
             "matrix": dict(matrix or {}),
             "env": {},
@@ -735,7 +740,11 @@ def run_rules(model):
         findings.append({"rule": rule, "job": job, "severity": severity,
                          "message": msg, "line": line or 0})
 
-    if not model.jobs:
+    raw_unsupported = getattr(model, "unsupported_yaml", False)
+    if raw_unsupported:
+        add("AR016", "-", "workflow uses YAML anchors/aliases or merge keys, which this parser does not support; "
+                          "treat every finding as partial", 0, "warning")
+    if not model.jobs and not raw_unsupported:
         add("AR014", "-", "workflow declares no jobs; nothing can ever run")
     if not model.triggers:
         add("AR015", "-", "no `on:` triggers declared; the workflow can never start")
@@ -1160,7 +1169,7 @@ def analyse(paths, trigger=None, known=None, want_json=False):
         except OSError as exc:
             raise SystemExit(_usage_error("cannot read %s: %s" % (path, exc)))
         doc = parse_yaml(text)
-        model = Model(doc, path)
+        model = Model(doc, path, text)
         models.append((path, model))
         for f in run_rules(model):
             f["file"] = path

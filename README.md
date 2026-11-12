@@ -32,7 +32,7 @@ Upstream: https://github.com/vercel-labs/agent-browser
 
 **做**：解析 workflow 的 YAML 子集，展开 `strategy.matrix`（cartesian → exclude → include，顺序按 GitHub 语义），
 用三值逻辑（true / false / unknown）求值 `if:`（含 `needs.*.outputs.*`、`needs.*.result`、`always()` /
-`success()` 的隐式状态检查），得到每个 job 的"能跑 / 必须跑 / 可能被跳过 / 确定死掉"，并用 15 条规则报告缺口。
+`success()` 的隐式状态检查），得到每个 job 的"能跑 / 必须跑 / 可能被跳过 / 确定死掉"，并用 15 条自证规则报告缺口（另有 AR016 锚点全局警告，不参与自证）。
 
 **不**：不联网、不调用 GitHub API、不执行 workflow、不猜 secret 或哈希值；`hashFiles()`、`fromJSON()`
 这类运行时函数一律返回 unknown，且 unknown 不会被打扮成 true 或 false。
@@ -79,7 +79,7 @@ publish  runs     witness 2/5  result:build=success, trigger=push
 
 退出码：`0` 没有 error 级发现（且场景结论全部可定）、`1` 检出问题或有无法判定的结论、`2` 用法错误 / 文件读不了。
 
-`--self-test` 跑规则自证：15 条规则各配一对文件，**干净文件与缺陷文件只差 1 行**，要求缺陷文件触发、
+`--self-test` 跑规则自证：15 条自证规则各配一对文件（AR016 是全局警告，不参与自证），**干净文件与缺陷文件只差 1 行**，要求缺陷文件触发、
 干净文件不触发、且 diff 恰好 1 行——这样"负例最小"是被机器检查的，而不是写在 README 里的一句话。
 
 ## 真实语料上的结果

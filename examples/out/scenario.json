@@ -1,0 +1,86 @@
+{
+  "tool": "actions-reach",
+  "version": "1.0.0",
+  "files": [
+    "examples/in/scenario.yml"
+  ],
+  "triggers": {
+    "examples/in/scenario.yml": [
+      "push"
+    ]
+  },
+  "findings": [
+    {
+      "rule": "AR010",
+      "job": "publish",
+      "severity": "warning",
+      "message": "if uses always() with needs that can fail; it will run even when its dependency failed (artifacts may be missing)",
+      "line": 17,
+      "file": "examples/in/scenario.yml"
+    }
+  ],
+  "summary": {
+    "files": 1,
+    "jobs": 3,
+    "errors": 0,
+    "warnings": 1
+  },
+  "scenario": {
+    "trigger": "push",
+    "known": [
+      "output:check.should_release=true",
+      "result:check=success",
+      "result:build=success"
+    ],
+    "jobs": {
+      "examples/in/scenario.yml": [
+        {
+          "file": "examples/in/scenario.yml",
+          "job": "check",
+          "verdict": "success",
+          "needs": [],
+          "legs": 1,
+          "witness": [
+            "result:check=success",
+            "trigger=push"
+          ],
+          "witness_size": 2,
+          "witness_full": 5
+        },
+        {
+          "file": "examples/in/scenario.yml",
+          "job": "build",
+          "verdict": "success",
+          "needs": [
+            "check"
+          ],
+          "legs": 1,
+          "witness": [
+            "output:check.should_release=true",
+            "result:build=success",
+            "result:check=success",
+            "trigger=push"
+          ],
+          "witness_size": 4,
+          "witness_full": 5
+        },
+        {
+          "file": "examples/in/scenario.yml",
+          "job": "publish",
+          "verdict": "runs",
+          "needs": [
+            "check",
+            "build"
+          ],
+          "legs": 1,
+          "witness": [
+            "result:build=success",
+            "trigger=push"
+          ],
+          "witness_size": 2,
+          "witness_full": 5
+        }
+      ]
+    }
+  }
+}

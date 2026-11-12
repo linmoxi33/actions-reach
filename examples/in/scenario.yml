@@ -1,0 +1,20 @@
+on: push
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.c.outputs.v }}
+    steps:
+      - run: echo ok
+  build:
+    needs: check
+    if: needs.check.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo build
+  publish:
+    needs: [check, build]
+    if: always() && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo publish

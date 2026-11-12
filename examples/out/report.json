@@ -1,0 +1,53 @@
+{
+  "tool": "actions-reach",
+  "version": "1.0.0",
+  "files": [
+    "examples/in/pipeline.yml"
+  ],
+  "triggers": {
+    "examples/in/pipeline.yml": [
+      "push",
+      "workflow_dispatch"
+    ]
+  },
+  "findings": [
+    {
+      "rule": "AR004",
+      "job": "build",
+      "severity": "error",
+      "message": "if reads needs.check.outputs.shold_release, but check declares no such output; the value is always empty",
+      "line": 18,
+      "file": "examples/in/pipeline.yml"
+    },
+    {
+      "rule": "AR001",
+      "job": "docs",
+      "severity": "error",
+      "message": "if is false under every trigger; the job is dead code",
+      "line": 25,
+      "file": "examples/in/pipeline.yml"
+    },
+    {
+      "rule": "AR012",
+      "job": "docs",
+      "severity": "error",
+      "message": "if requires event_name == 'release' but `on:` never triggers it",
+      "line": 25,
+      "file": "examples/in/pipeline.yml"
+    },
+    {
+      "rule": "AR010",
+      "job": "publish",
+      "severity": "warning",
+      "message": "if uses always() with needs that can fail; it will run even when its dependency failed (artifacts may be missing)",
+      "line": 31,
+      "file": "examples/in/pipeline.yml"
+    }
+  ],
+  "summary": {
+    "files": 1,
+    "jobs": 4,
+    "errors": 3,
+    "warnings": 1
+  }
+}
